@@ -1,61 +1,51 @@
-from kivy.uix.button import Button
-from kivy.uix.widget import Widget
-from kivy.uix.label import Label
-from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
-from kivy.graphics import Color, Rectangle
-from random import random as r
-from functools import partial
+from kivy.uix.button import Button
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.properties import ObjectProperty
+from kivy.core.window import Window
+from kivy.config import Config
+
+Config.set('kivy', 'keyboard_mode', 'systemanddock')
+
+Window.size = (450, 753)
 
 
-class StressCanvasApp(App):
+def get_ingridients(m):
+    nitro = str(10 * m / 1000)
+    salt = str(15 * m / 1000)
+    starts = str(0.5 * m / 1000)
+    sugars = str(5 * m / 1000)
+    salting_time = str(round(m / 500 * 2))
+    return {'nitro': nitro,
+            'salt': salt,
+            'sugars': sugars,
+            'starts': starts,
+            'salting_time': salting_time}
 
-    def add_rects(self, label, wid, count, *largs):
-        label.text = str(int(label.text) + count)
-        with wid.canvas:
-            for x in range(count):
-                Color(r(), 1, 1, mode='hsv')
-                Rectangle(pos=(r() * wid.width + wid.x,
-                               r() * wid.height + wid.y), size=(20, 20))
 
-    def double_rects(self, label, wid, *largs):
-        count = int(label.text)
-        self.add_rects(label, wid, count, *largs)
+class Container(GridLayout):
+    def calculate(self):
+        try:
+            mass = int(self.text_input.text)
+        except:
+            mass = 0
+        ingridients = get_ingridients(mass)
+        print(ingridients)
+        self.salt.text = ingridients.get('salt') + '+ 5'
+        self.nitro.text = ingridients.get('nitro')
+        self.starts.text = ingridients.get('starts')
+        self.sugars.text = ingridients.get('sugars')
+        self.time.text = ingridients.get('salting_time')
 
-    def reset_rects(self, label, wid, *largs):
-        label.text = '0'
-        wid.canvas.clear()
 
+
+
+class MyApp(App):
     def build(self):
-        wid = Widget()
-
-        label = Label(text='0')
-
-        btn_add100 = Button(text='+ 100 rects',
-                            on_press=partial(self.add_rects, label, wid, 100))
-
-        btn_add500 = Button(text='+ 500 rects',
-                            on_press=partial(self.add_rects, label, wid, 500))
-
-        btn_double = Button(text='x 2',
-                            on_press=partial(self.double_rects, label, wid))
-
-        btn_reset = Button(text='Reset',
-                           on_press=partial(self.reset_rects, label, wid))
-
-        layout = BoxLayout(size_hint=(1, None), height=50)
-        layout.add_widget(btn_add100)
-        layout.add_widget(btn_add500)
-        layout.add_widget(btn_double)
-        layout.add_widget(btn_reset)
-        layout.add_widget(label)
-
-        root = BoxLayout(orientation='vertical')
-        root.add_widget(wid)
-        root.add_widget(layout)
-
-        return root
+        return Container()
 
 
 if __name__ == '__main__':
-    StressCanvasApp().run()
+    MyApp().run()
